@@ -442,7 +442,7 @@ function HomePage() {
           alt=""
         />
       </div>
-      <div className="flex flex-col w-full py-36">
+      <div className="flex w-full py-36">
         <ToastContainer />
         <Card className=" mx-auto p-10 lg:w-[700px] md:w-[700px] ">
           <CardBody className="">
