@@ -116,12 +116,25 @@ function HomePage() {
   const [mensajeModal, setMensajeModal] = useState(null);
 
   async function getServicios() {
-    // reinicar todo por defecto
-    setIsDisabledStep2(true);
+    // reinicar todo los campos por defecto
     setIsDisabledSelectProveedores(true);
     setDefaultSelectedIdProveedor(["0"]);
-    setSelectedTab("step1");
     setDefaultSelectedIdServicio(["0"]);
+    setNombre("");
+    setApellido("");
+    setCorreo("");
+    setTelefono("");
+    setNotas("");
+    setFechaSeleccionadaValida(null);
+    setHorarioSeleccionado(["0"]);
+    setHorarioDisponible([]);
+
+    // reiniciar la tap
+    setSelectedTab("step1");
+
+    // desabilitar las tabs
+    setIsDisabledStep2(true);
+    setIsDisabledStep3(true);
 
     setIsLoadingServicios(true);
     const data = await obtenerServicios();
