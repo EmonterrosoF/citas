@@ -1,20 +1,15 @@
-import {
-  SP_OBTENER_PROVEEDORES_POR_SERVICIO,
-  SP_CITAS_RESERVADAS,
-} from "../utils/sp.js";
+import { SP_GUARDAR_HORARIO_LABORAL, SP_HORARIO_LABORAL } from "../utils/sp.js";
 import { ejecutarSP } from "../data/dbConexion.js";
 
-export const getProveedoresPorServicio = async (req, res, next) => {
+export const getHorarioLaboral = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const resultado = await ejecutarSP(SP_OBTENER_PROVEEDORES_POR_SERVICIO, [
-      id,
-    ]);
-    if (!resultado) {
-      const error = new Error("Error interno  del servidor");
-      return next(error);
-    }
-    res.json(resultado);
+    const horario = await ejecutarSP(SP_HORARIO_LABORAL);
+    console.log(JSON.parse(horario[0]?.valor));
+    res.json({
+      resultado: JSON.parse(horario[0]?.valor),
+      ocurrioError: false,
+      mensaje: "exito",
+    });
   } catch (err) {
     console.log(err);
     const error = new Error("Error interno del servidor");
@@ -22,14 +17,24 @@ export const getProveedoresPorServicio = async (req, res, next) => {
   }
 };
 
-export const getCitasReservadasProveedor = async (req, res, next) => {
+export const guardarHorarioLaboral = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const resultado = await ejecutarSP(SP_CITAS_RESERVADAS, [id]);
-    res.json(resultado);
+    let { horarioLaboral } = req.body;
+
+    horarioLaboral = JSON.stringify(horarioLaboral);
+
+    await ejecutarSP(SP_GUARDAR_HORARIO_LABORAL, [horarioLaboral]);
+
+    res.json({
+      resultado: null,
+      ocurrioError: false,
+      mensaje: `Horario laboral guardando exitosamente`,
+    });
   } catch (err) {
     console.log(err);
-    const error = new Error("Error interno del servidor");
+    const error = new Error(
+      "Ha ocurrido un error, por favor intenta mas tarde"
+    );
     next(error);
   }
 };
