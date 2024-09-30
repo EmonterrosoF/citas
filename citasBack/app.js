@@ -7,6 +7,7 @@ import { HOST_FRONT } from "./config.js";
 import serviciosRoute from "./routes/serviciosRoute.js";
 import usuariosRoute from "./routes/usuariosRoute.js";
 import citasRoute from "./routes/citasRoute.js";
+import configRoute from "./routes/configRoute.js";
 
 // import reportesRoute from "./routes/reportesRoute.js";
 
@@ -33,6 +34,9 @@ app.use("/api/usuarios", usuariosRoute);
 
 // citas
 app.use("/api/citas", citasRoute);
+
+// configuraciones
+app.use("/api/config", configRoute);
 
 // // manejador de errores
 app.use(noEncontrado);
