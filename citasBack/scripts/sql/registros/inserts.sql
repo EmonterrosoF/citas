@@ -14,11 +14,14 @@ VALUES(
         'Chiquimulilla',
         0,
         30
-    ) --insertar rol
+    );
+    
+-- insertar rol
 INSERT INTO `citas`.`roles` (`nombre`, `tipo`)
 VALUES ('administrador', 'ADMIN'),
     ('colaborador', 'usuario');
---insertar usuario
+
+-- insertar usuario
 INSERT INTO `citas`.`usuarios` (
         `nombre`,
         `apellido`,
@@ -36,42 +39,25 @@ VALUES (
         'chiquimulilla',
         0,
         2
-    ) -- relacionar servicio con usuario
-INSERT INTO `citas`.`servicios_usuarios` (`id_usuario`, `id_servicio`)
-VALUES(1, 1) --citas
-INSERT INTO `citas`.`citas` (
-        `fecha_reserva`,
-        `fecha_inicio`,
-        `fecha_fin`,
-        `estado`,
-        `id_usuario_proveedor`,
-        `id_servicio`
+    );
+
+    -- insertar usuarios_configuraciones
+INSERT INTO `citas`.`usuarios_configuraciones` (
+        `id_usuario`,
+        `usuario`,
+        `password`
     )
 VALUES (
-        NOW(),
-        NOW(),
-        DATE_ADD(NOW(), INTERVAL 30 MINUTE),
-        'RESERVADA',
         1,
-        1
-    ),
-    (
-        NOW(),
-        DATE_ADD(NOW(), INTERVAL 1 DAY),
-        DATE_ADD(
-            DATE_ADD(NOW(), INTERVAL 1 DAY),
-            INTERVAL 30 MINUTE
-        ),
-        'RESERVADA',
-        1,
-        1
+        'mario',
+        '123456'
     );
-SELECT fecha_inicio AS fechaInicio
-FROM citas
-WHERE id_usuario_proveedor = 1
-    AND id_servicio = 1
-    AND estado = 'RESERVADA';
---configuraciones
+
+-- relacionar servicio con usuario
+INSERT INTO `citas`.`servicios_usuarios` (`id_usuario`, `id_servicio`) 
+    VALUES(1, 1);
+
+-- configuraciones
 INSERT INTO `citas`.`configuraciones_globales` (`nombre`, `valor`)
 VALUES (
         'horario_laboral',
