@@ -10,7 +10,7 @@ CREATE PROCEDURE `guardar_servicio`(
 ) 
 BEGIN
 	-- Declarar variables para capturar el mensaje de error
-    DECLARE v_errorMsg TEXT;
+    DECLARE v_errorMsg VARCHAR(125);
 
     -- Handler para manejar excepciones de SQL
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
