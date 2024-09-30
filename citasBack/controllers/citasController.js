@@ -1,4 +1,5 @@
 import {
+  SP_CANCELAR_CITA,
   SP_CITAS_RESERVADAS,
   SP_CITAS_RESERVADAS_POR_FECHA,
   SP_GUARDAR_CITA,
@@ -6,13 +7,13 @@ import {
 } from "../utils/sp.js";
 import { ejecutarSP } from "../data/dbConexion.js";
 const diasDeLaSemana = {
-  0: "domingo",
-  1: "lunes",
-  2: "martes",
-  3: "miercoles",
-  4: "jueves",
-  5: "viernes",
-  6: "sabado",
+  0: "lunes",
+  1: "martes",
+  2: "miercoles",
+  3: "jueves",
+  4: "viernes",
+  5: "sabado",
+  6: "domingo",
 };
 
 export const getCitasReservadasProveedor = async (req, res, next) => {
@@ -31,18 +32,18 @@ export const getCitasReservadasProveedor = async (req, res, next) => {
     const diasReservados = [];
 
     citasReservadas.forEach((fechaCita) => {
-      const fecha = new Date(fechaCita.fechaInicio).toLocaleDateString();
+      const fecha = new Date(fechaCita.fechaInicio).toString();
       console.log(fecha);
-      let dia = new Date(fechaCita.fechaInicio).getUTCDay();
+      let dia = new Date(fechaCita.fechaInicio).getDay();
       dia = diasDeLaSemana[dia];
       console.log(dia);
 
       const horario = horarioLaboral[dia];
 
-      const inicioHoras = new Date(fechaCita.fechaInicio).getUTCHours();
-      const inicioMinutos = new Date(fechaCita.fechaInicio).getUTCMinutes();
-      const finHoras = new Date(fechaCita.fechaFin).getUTCHours();
-      const finMinutos = new Date(fechaCita.fechaFin).getUTCMinutes();
+      const inicioHoras = new Date(fechaCita.fechaInicio).getHours();
+      const inicioMinutos = new Date(fechaCita.fechaInicio).getMinutes();
+      const finHoras = new Date(fechaCita.fechaFin).getHours();
+      const finMinutos = new Date(fechaCita.fechaFin).getMinutes();
 
       const minutosInicio = inicioHoras * 60 + inicioMinutos;
       const minutosFin = finHoras * 60 + finMinutos;
@@ -91,9 +92,8 @@ export const getCitasReservadasProveedor = async (req, res, next) => {
           //   console.log(horario);
           //   console.log(duracionTotal / 60);
         }
-        console.log(duracionesPorDia[fecha], " ", duracionTotalLaboral);
+
         if (duracionesPorDia[fecha] >= duracionTotalLaboral) {
-          console.log("duracion por dia", duracionesPorDia);
           diasReservados.push(fecha);
         }
       }
@@ -131,7 +131,7 @@ export const getdiasNoLaborales = async (req, res, next) => {
       mensaje: "exito",
     });
   } catch (err) {
-    console.log("ocurrio error0", err);
+    console.log(err);
     const error = new Error(
       "Ha ocurrido un error, por favor intenta de nuevo o mas tarde"
     );
@@ -143,21 +143,24 @@ export const getHorarioDisponiblePorFecha = async (req, res, next) => {
   try {
     let { fecha, idProveedor, duracionServicio } = req.query;
 
-    console.log("query", fecha, idProveedor);
-    const diaSemana = new Date(fecha).getUTCDay();
-    console.log("fecha", diasDeLaSemana[diaSemana]);
+    duracionServicio = parseInt(duracionServicio);
+
+    console.log("fecha", fecha);
+    const diaSemana = new Date(fecha).getDay();
     const citasReservadas = await ejecutarSP(SP_CITAS_RESERVADAS_POR_FECHA, [
       fecha,
       idProveedor,
     ]);
-    console.log("CITAS RESERVADAS", citasReservadas);
 
     const resultado = await ejecutarSP(SP_HORARIO_LABORAL);
     const horarioLaboral = JSON.parse(resultado[0].valor);
 
     const dia = diasDeLaSemana[diaSemana];
 
+    console.log(diaSemana);
     const horario = horarioLaboral[dia];
+
+    console.log("horario", horario);
 
     if (!horario) {
       return res.json([]); // No hay horario laboral para este día
@@ -171,12 +174,18 @@ export const getHorarioDisponiblePorFecha = async (req, res, next) => {
         .map(Number);
       const [finHoras, finMinutos] = horario.fin.split(":").map(Number);
       let minutosActuales = inicioHoras * 60 + inicioMinutos;
+      let minutosFinLaboral = finHoras * 60 + finMinutos;
 
-      while (minutosActuales + 15 <= finHoras * 60 + finMinutos) {
-        intervalos.push(minutosActuales);
+      while (minutosActuales + 15 <= minutosFinLaboral) {
+        // Verificar que el servicio completo (inicio + duración) no exceda el horario laboral
+        if (minutosActuales + duracionServicio <= minutosFinLaboral) {
+          intervalos.push(minutosActuales);
+        }
         minutosActuales += 15;
       }
     }
+
+    console.log("intervalos", intervalos);
 
     // Restar los intervalos que caen dentro de los descansos
     if (horario?.descanso) {
@@ -203,21 +212,16 @@ export const getHorarioDisponiblePorFecha = async (req, res, next) => {
     /// Verificar los horarios ocupados y filtrar los intervalos disponibles
     citasReservadas?.forEach((reserva) => {
       const inicioReserva =
-        new Date(reserva.fechaInicio).getUTCHours() * 60 +
-        new Date(reserva.fechaInicio).getUTCMinutes();
+        new Date(reserva.fechaInicio).getHours() * 60 +
+        new Date(reserva.fechaInicio).getMinutes();
       const finReserva =
-        new Date(reserva.fechaFin).getUTCHours() * 60 +
-        new Date(reserva.fechaFin).getUTCMinutes();
-
-      console.log("inicio reserva", inicioReserva, "fin reserva", finReserva);
-      console.log("intervalos antes", intervalos);
+        new Date(reserva.fechaFin).getHours() * 60 +
+        new Date(reserva.fechaFin).getMinutes();
 
       intervalos = intervalos.filter(
         (minutos) =>
           minutos + duracionServicio <= inicioReserva || minutos >= finReserva
       );
-
-      console.log("intervalos después", intervalos);
     });
 
     // Convertir los intervalos disponibles a formato de horas y minutos
@@ -256,31 +260,25 @@ export const guardarCita = async (req, res, next) => {
       correoCliente,
       telefonoCliente,
       notasCLiente,
+      fechaFin,
     } = req.body;
 
-    // Combinar fechaInicio y hora para crear un objeto new Date
-    const [hours, minutes] = hora.split(":");
+    let fechaInicioCompleta = null;
+    let fechaFinal = null;
 
-    console.log(hours, minutes);
-    const fechaInicioCompleta = new Date(`${fechaInicio}T${hora}Z`);
-    console.log(fechaInicioCompleta);
+    if (!fechaFin) {
+      // Combinar fechaInicio y hora para crear un objeto new Date
+      const [hours, minutes] = hora.split(":");
 
-    // Calcular la fecha final sumando la duración del servicio (en minutos)
-    const fechaFinal = new Date(fechaInicioCompleta);
-    fechaFinal.setMinutes(fechaFinal.getMinutes() + duracionServicio);
+      fechaInicioCompleta = new Date(`${fechaInicio}T${hora}`);
 
-    const data = {
-      idServicio,
-      duracionServicio,
-      idProveedor,
-      fechaInicio: fechaInicioCompleta,
-      fechaFinal: fechaFinal,
-      nombreCliente,
-      apellidoCliente,
-      correoCliente,
-      telefonoCliente,
-      notasCLiente,
-    };
+      // Calcular la fecha final sumando la duración del servicio (en minutos)
+      fechaFinal = new Date(fechaInicioCompleta);
+      fechaFinal.setMinutes(fechaFinal.getMinutes() + duracionServicio);
+    } else {
+      fechaInicioCompleta = new Date(fechaInicio);
+      fechaFinal = new Date(fechaFin);
+    }
 
     await ejecutarSP(SP_GUARDAR_CITA, [
       idServicio,
@@ -298,6 +296,26 @@ export const guardarCita = async (req, res, next) => {
       resultado: null,
       ocurrioError: false,
       mensaje: `Cita reservada exitosamente`,
+    });
+  } catch (err) {
+    console.log(err);
+    const error = new Error(
+      "Ha ocurrido un error, por favor intenta mas tarde"
+    );
+    next(error);
+  }
+};
+
+export const cancelarCita = async (req, res, next) => {
+  const { idCita, nota } = req.body;
+
+  try {
+    await ejecutarSP(SP_CANCELAR_CITA, [idCita, nota]);
+
+    res.json({
+      resultado: null,
+      ocurrioError: false,
+      mensaje: `Cita cancelada exitosamente`,
     });
   } catch (err) {
     console.log(err);
