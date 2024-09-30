@@ -8,8 +8,8 @@ CREATE TABLE `roles` (
   `id` int NOT NULL AUTO_INCREMENT,
   `fecha_creacion` datetime DEFAULT NOW(),
   `fecha_actualizacion` datetime DEFAULT NOW(),
-  `nombre` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `tipo` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombre` varchar(256) DEFAULT NULL,
+  `tipo` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
 -- Tabla de usuarios proveedores de las citas
@@ -18,11 +18,11 @@ CREATE TABLE `usuarios` (
   `id` int NOT NULL AUTO_INCREMENT,
   `fecha_creacion` datetime DEFAULT NOW(),
   `fecha_actualizacion` datetime DEFAULT NOW(),
-  `nombre` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `apellido` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `telefono` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `direccion` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombre` varchar(256) DEFAULT NULL,
+  `apellido` varchar(512) DEFAULT NULL,
+  `email` varchar(512) DEFAULT NULL,
+  `telefono` varchar(128) DEFAULT NULL,
+  `direccion` varchar(256) DEFAULT NULL,
   `privado` tinyint DEFAULT '0',
   `id_rol` int DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -35,9 +35,9 @@ CREATE TABLE `usuarios_configuraciones` (
   `id_usuario` int NOT NULL,
   `fecha_creacion` datetime DEFAULT NOW(),
   `fecha_actualizacion` datetime DEFAULT NOW(),
-  `usuario` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `password` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `plan_trabajo` text COLLATE utf8mb4_unicode_ci,
+  `usuario` varchar(256) DEFAULT NULL,
+  `password` varchar(512) DEFAULT NULL,
+  `plan_trabajo` text,
   PRIMARY KEY (`id_usuario`),
   CONSTRAINT `usuarios_configuraciones_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -47,12 +47,12 @@ CREATE TABLE `clientes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `fecha_creacion` datetime DEFAULT NOW(),
   `fecha_actualizacion` datetime DEFAULT NOW(),
-  `nombre` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `apellido` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `telefono` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `direccion` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notas` text COLLATE utf8mb4_unicode_ci,
+  `nombre` varchar(256) DEFAULT NULL,
+  `apellido` varchar(512) DEFAULT NULL,
+  `email` varchar(512) DEFAULT NULL,
+  `telefono` varchar(128) DEFAULT NULL,
+  `direccion` varchar(256) DEFAULT NULL,
+  `notas` text,
   PRIMARY KEY (`id`)
 );
 -- Tabla de configuraciones cliente
@@ -61,8 +61,8 @@ CREATE TABLE `clientes_configuraciones` (
   `id_cliente` int NOT NULL,
   `fecha_creacion` datetime DEFAULT NOW(),
   `fecha_actualizacion` datetime DEFAULT NOW(),
-  `usuario` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `password` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `usuario` varchar(256) DEFAULT NULL,
+  `password` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id_cliente`),
   CONSTRAINT `clientes_configuraciones_cliente` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -72,10 +72,10 @@ CREATE TABLE `servicios` (
   `id` int NOT NULL AUTO_INCREMENT,
   `fecha_creacion` datetime DEFAULT NOW(),
   `fecha_actualizacion` datetime DEFAULT NOW(),
-  `nombre` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombre` varchar(256) DEFAULT NULL,
   `precio` decimal(10, 2) DEFAULT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
-  `ubicacion` text COLLATE utf8mb4_unicode_ci,
+  `descripcion` text,
+  `ubicacion` text,
   `privado` tinyint DEFAULT '0',
   `duracion` int DEFAULT null,
   PRIMARY KEY (`id`)
@@ -89,9 +89,9 @@ CREATE TABLE `citas` (
   `fecha_reserva` datetime DEFAULT NULL,
   `fecha_inicio` datetime DEFAULT NULL,
   `fecha_fin` datetime DEFAULT NULL,
-  `ubicacion` text COLLATE utf8mb4_unicode_ci,
-  `notas` text COLLATE utf8mb4_unicode_ci,
-  `estado` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `ubicacion` text,
+  `notas` text,
+  `estado` varchar(512) DEFAULT '',
   `tiene_disponibilidad` tinyint NOT NULL DEFAULT '0',
   `id_usuario_proveedor` int DEFAULT NULL,
   `id_usuario_cliente` int DEFAULT NULL,
@@ -120,7 +120,7 @@ CREATE TABLE `configuraciones_globales` (
   `id` int NOT NULL AUTO_INCREMENT,
   `fecha_creacion` datetime DEFAULT NOW(),
   `fecha_actualizacion` datetime DEFAULT NOW(),
-  `nombre` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `valor` longtext COLLATE utf8mb4_unicode_ci,
+  `nombre` varchar(512) DEFAULT NULL,
+  `valor` longtext,
   PRIMARY KEY (`id`)
 );
