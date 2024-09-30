@@ -12,7 +12,6 @@ const conexionMySql = async () => {
       database: DB,
       // port: 3306,
       password: PASS,
-      timezone: "Z",
     });
 
     console.log("CONEXION EXITOSA DB");
@@ -42,8 +41,8 @@ export const ejecutarSP = async (sp, parametros = []) => {
 
     const [rows, fields] = await conection.execute(query, parametros);
 
-    console.log(rows[0]);
-    console.log(fields);
+    // console.log(rows[0]);
+    // console.log(fields);
     await conection.end();
     return rows[0];
   } catch (error) {
