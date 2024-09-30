@@ -20,7 +20,7 @@ import {
 import { useState, useEffect } from "react";
 import { I18nProvider } from "@react-aria/i18n";
 
-import { obtenerServicios } from "../services/servicios";
+import { obtenerServiciosCliente } from "../services/servicios";
 import { obtenerProveedoresPorServicio } from "../services/usuarios";
 import {
   guardarCita,
@@ -40,15 +40,7 @@ import imagenBarberia from "../assets/barberia.jpg";
 
 import { today, getLocalTimeZone } from "@internationalized/date";
 
-const diasDeLaSemana = {
-  0: "domingo",
-  1: "lunes",
-  2: "martes",
-  3: "miercoles",
-  4: "jueves",
-  5: "viernes",
-  6: "sabado",
-};
+import { diasDeLaSemana } from "../utils/diasDeLaSemana";
 
 const nombreEmpresa = "PRUEBA S.A.";
 function HomePage() {
@@ -137,7 +129,7 @@ function HomePage() {
     setIsDisabledStep3(true);
 
     setIsLoadingServicios(true);
-    const data = await obtenerServicios();
+    const data = await obtenerServiciosCliente();
 
     if (!data.ocurrioError) {
       if (data.resultado.length > 0) {
@@ -267,7 +259,7 @@ function HomePage() {
       );
 
       if (!data.ocurrioError) {
-        if (data.resultado.length > 0)
+        if (data?.resultado?.length > 0)
           setHorarioDisponible(["-- Seleccionar --", ...data.resultado]);
 
         setHorarioSeleccionado(["0"]);
@@ -409,15 +401,15 @@ function HomePage() {
     const fechaInicio = new Date(
       `${fechaSeleccionadaValida.toString()}T${
         horarioDisponible[horarioSeleccionado[0]]
-      }Z`
+      }`
     );
 
-    const year = fechaInicio.getUTCFullYear();
-    const month = String(fechaInicio.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(fechaInicio.getUTCDate()).padStart(2, "0");
-    const hours = String(fechaInicio.getUTCHours()).padStart(2, "0");
-    const minutes = String(fechaInicio.getUTCMinutes()).padStart(2, "0");
-    const seconds = String(fechaInicio.getUTCSeconds()).padStart(2, "0");
+    const year = fechaInicio.getFullYear();
+    const month = String(fechaInicio.getMonth() + 1).padStart(2, "0");
+    const day = String(fechaInicio.getDate()).padStart(2, "0");
+    const hours = String(fechaInicio.getHours()).padStart(2, "0");
+    const minutes = String(fechaInicio.getMinutes()).padStart(2, "0");
+    const seconds = String(fechaInicio.getSeconds()).padStart(2, "0");
 
     return `${year}${month}${day}T${hours}${minutes}${seconds}`;
   }
@@ -426,7 +418,7 @@ function HomePage() {
     const fechaInicio = new Date(
       `${fechaSeleccionadaValida.toString()}T${
         horarioDisponible[horarioSeleccionado[0]]
-      }Z`
+      }`
     );
 
     const duracion = servicios.find(
@@ -436,12 +428,12 @@ function HomePage() {
     const fechaFinal = new Date(fechaInicio);
     fechaFinal.setMinutes(fechaFinal.getMinutes() + duracion);
 
-    const year = fechaFinal.getUTCFullYear();
-    const month = String(fechaFinal.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(fechaFinal.getUTCDate()).padStart(2, "0");
-    const hours = String(fechaFinal.getUTCHours()).padStart(2, "0");
-    const minutes = String(fechaFinal.getUTCMinutes()).padStart(2, "0");
-    const seconds = String(fechaFinal.getUTCSeconds()).padStart(2, "0");
+    const year = fechaFinal.getFullYear();
+    const month = String(fechaFinal.getMonth() + 1).padStart(2, "0");
+    const day = String(fechaFinal.getDate()).padStart(2, "0");
+    const hours = String(fechaFinal.getHours()).padStart(2, "0");
+    const minutes = String(fechaFinal.getMinutes()).padStart(2, "0");
+    const seconds = String(fechaFinal.getSeconds()).padStart(2, "0");
 
     return `${year}${month}${day}T${hours}${minutes}${seconds}`;
   }
