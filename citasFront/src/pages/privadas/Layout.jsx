@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   Navbar,
   NavbarBrand,
@@ -13,20 +13,42 @@ import {
   DropdownItem,
   DropdownTrigger,
   Image,
+  Button,
+  divider,
 } from "@nextui-org/react";
 import logo from "../../assets/logo.png";
 import avatar from "../../assets/avatar.jpg";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
+
+import { toast } from "react-toastify";
+import { cerrarSesion } from "../../services/auth";
+import { AuthContext } from "../../context/authProvider";
 
 export default function Layout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const { user } = useContext(AuthContext);
+
   const menuItems = [
     { modulo: "Calendario", to: "/panel" },
-    { modulo: "Clientes", to: "/panel/clientes" },
-    { modulo: "Servicios", to: "/panel/servicios" },
-    { modulo: "Usuarios", to: "/panel/usuarios" },
+    { modulo: "Clientes", to: "/panel/clientes", rol: "ADMIN" },
+    { modulo: "Servicios", to: "/panel/servicios", rol: "ADMIN" },
+    { modulo: "Usuarios", to: "/panel/usuarios", rol: "ADMIN" },
   ];
+
+  const navigate = useNavigate();
+
+  const logout = async () => {
+    const data = await toast.promise(cerrarSesion(), {
+      pending: "Cargando...",
+    });
+
+    if (!data.ocurrioError) {
+      navigate("/login");
+    } else {
+      toast.error(data.mensaje);
+    }
+  };
 
   return (
     <>
@@ -74,20 +96,31 @@ export default function Layout() {
               Calendario
             </Link>
           </NavbarItem>
+          {user.rol === "ADMIN" && (
+            <NavbarItem>
+              <Link
+                color="foreground"
+                to={"/panel/clientes"}
+                aria-current="page"
+              >
+                Clientes
+              </Link>
+            </NavbarItem>
+          )}
+
           <NavbarItem>
-            <Link color="foreground" to={"/panel/clientes"} aria-current="page">
-              Clientes
-            </Link>
+            {user.rol === "ADMIN" && (
+              <Link color="foreground" to={"/panel/servicios"}>
+                Servicios
+              </Link>
+            )}
           </NavbarItem>
           <NavbarItem>
-            <Link color="foreground" to={"/panel/servicios"}>
-              Servicios
-            </Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Link color="foreground" to={"/panel/usuarios"}>
-              Usuarios
-            </Link>
+            {user.rol === "ADMIN" && (
+              <Link color="foreground" to={"/panel/usuarios"}>
+                Usuarios
+              </Link>
+            )}
           </NavbarItem>
         </NavbarContent>
 
@@ -102,8 +135,8 @@ export default function Layout() {
                     src: avatar,
                   }}
                   className="transition-transform"
-                  description="@tonyreichert"
-                  name="Tony Reichert"
+                  description={`@${user.username}`}
+                  name={`${user.nombre} ${user.apellido}`}
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="User Actions" variant="flat">
@@ -118,23 +151,25 @@ export default function Layout() {
                     </Link>
                   </p>
                 </DropdownItem>
-                <DropdownItem key="configurations">
-                  <Link
-                    style={{ padding: "0 100% 0 0" }}
-                    color="foreground"
-                    to={"/panel/configuraciones"}
-                  >
-                    Configuraciones
-                  </Link>
-                </DropdownItem>
+                {user.rol === "ADMIN" && (
+                  <DropdownItem key="configurations">
+                    <Link
+                      style={{ padding: "0 100% 0 0" }}
+                      color="foreground"
+                      to={"/panel/configuraciones"}
+                    >
+                      Configuraciones
+                    </Link>
+                  </DropdownItem>
+                )}
                 <DropdownItem key="logout" color="danger">
-                  <Link
-                    style={{ padding: "0 100% 0 0" }}
+                  <Button
+                    style={{ padding: "0 0 0 0", height: "20px" }}
                     color="foreground"
-                    to={"/panel/perfil"}
+                    onClick={() => logout()}
                   >
                     Cerrar sesion
-                  </Link>
+                  </Button>
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>
@@ -142,25 +177,27 @@ export default function Layout() {
         </NavbarContent>
 
         <NavbarMenu>
-          {menuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item.modulo}-${index}`}>
-              <Link
-                onClick={() => setIsMenuOpen(false)}
-                className="w-full"
-                color={
-                  index === 2
-                    ? "warning"
-                    : index === menuItems.length - 1
-                    ? "danger"
-                    : "foreground"
-                }
-                to={item.to}
-                size="lg"
-              >
-                {item.modulo}
-              </Link>
-            </NavbarMenuItem>
-          ))}
+          {menuItems
+            .filter((item) => !item.rol || item.rol === user.rol) // Filtrar elementos según el rol
+            .map((item, index) => (
+              <NavbarMenuItem key={`${item.modulo}-${index}`}>
+                <Link
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-full"
+                  color={
+                    index === 2
+                      ? "warning"
+                      : index === menuItems.length - 1
+                      ? "danger"
+                      : "foreground"
+                  }
+                  to={item.to}
+                  size="lg"
+                >
+                  {item.modulo}
+                </Link>
+              </NavbarMenuItem>
+            ))}
         </NavbarMenu>
       </Navbar>
       <main className="my-5">

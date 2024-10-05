@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   obtenerHorarioLaboral,
   obtenerCitas,
@@ -16,6 +16,8 @@ import dayjs from "dayjs";
 import ModalCita from "../../components/modalCita";
 
 import { diasDeLaSemana } from "../../utils/diasDeLaSemana";
+
+import { AuthContext } from "../../context/authProvider";
 
 const traduccion = {
   next: "siguiente",
@@ -51,6 +53,8 @@ export default function CalendarioPage() {
   const [cita, setCita] = useState({});
 
   const [horarioLaboral, setHorarioLaboral] = useState({});
+
+  const { user } = useContext(AuthContext);
 
   async function getCitas() {
     const dataCitas = await obtenerCitas();
@@ -233,7 +237,7 @@ export default function CalendarioPage() {
           });
           setVerModalCita(!verModalCita);
         }}
-        selectable
+        selectable={user.rol === "ADMIN"}
         slotPropGetter={(date) => {
           const day = diasDeLaSemana[date.getDay()];
           const horario = horarioLaboral[day];
@@ -281,7 +285,6 @@ export default function CalendarioPage() {
             };
           }
         }}
-        se
       />
       <ModalCita
         isOpen={verModalCita}

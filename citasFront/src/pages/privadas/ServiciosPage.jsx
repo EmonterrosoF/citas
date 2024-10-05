@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useContext } from "react";
 import {
   Table,
   TableHeader,
@@ -28,6 +28,8 @@ import ModalServicio from "../../components/modalServicio";
 import { EditIcon } from "../../components/icons/EditIcon";
 import { DeleteIcon } from "../../components/icons/DeleteIcon";
 import { PlusIcon } from "../../components/icons/PlusIcon";
+import { AuthContext } from "../../context/authProvider";
+import { useNavigate } from "react-router-dom";
 
 const capitalize = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -80,6 +82,10 @@ export default function ServiciosPage() {
   // para mostrar modal
   const [verModalServicio, setVerModalServicio] = useState(false);
 
+  const { user } = useContext(AuthContext);
+
+  const navigate = useNavigate();
+
   async function getServicios() {
     const data = await obtenerServicios();
 
@@ -93,6 +99,7 @@ export default function ServiciosPage() {
   }
 
   useEffect(() => {
+    if (user?.rol !== "ADMIN") return navigate("/panel");
     getServicios();
   }, []);
 

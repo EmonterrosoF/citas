@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useContext } from "react";
 import {
   Table,
   TableHeader,
@@ -33,6 +33,8 @@ import {
   obtenerServicios,
   obtenerServiciosPorUsuario,
 } from "../../services/servicios";
+import { AuthContext } from "../../context/authProvider";
+import { useNavigate } from "react-router-dom";
 
 const capitalize = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -91,6 +93,10 @@ export default function UsuariosPage() {
 
   const [serviciosSeleccionados, setServiciosSeleccionados] = useState([]);
 
+  const { user } = useContext(AuthContext);
+
+  const navigate = useNavigate();
+
   async function getUsuarios() {
     const data = await obtenerUsuarios();
 
@@ -114,6 +120,7 @@ export default function UsuariosPage() {
   }
 
   useEffect(() => {
+    if (user?.rol !== "ADMIN") return navigate("/panel");
     getUsuarios();
     getServicios();
   }, []);

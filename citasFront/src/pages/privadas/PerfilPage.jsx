@@ -10,7 +10,7 @@ export function PerfilPage() {
 
   async function getUsuario() {
     setIsLoding(true);
-    const data = await obtenerUsuario(1);
+    const data = await obtenerUsuario();
 
     if (!data.ocurrioError) {
       setUsuario(data.resultado);

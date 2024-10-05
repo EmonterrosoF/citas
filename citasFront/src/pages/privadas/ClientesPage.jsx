@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useContext } from "react";
 import {
   Table,
   TableHeader,
@@ -26,6 +26,8 @@ import { toast, ToastContainer } from "react-toastify";
 
 import dayjs from "dayjs";
 import ModalCliente from "../../components/modalCliente";
+import { AuthContext } from "../../context/authProvider";
+import { useNavigate } from "react-router-dom";
 
 const capitalize = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -72,6 +74,10 @@ export default function ClientesPage() {
   // para mostrar modal
   const [verModalCliente, setVerModalCliente] = useState(false);
 
+  const { user } = useContext(AuthContext);
+
+  const navigate = useNavigate();
+
   async function getClientes() {
     const data = await obtenerClientes();
 
@@ -84,6 +90,7 @@ export default function ClientesPage() {
   }
 
   useEffect(() => {
+    if (user?.rol !== "ADMIN") return navigate("/panel");
     getClientes();
   }, []);
 

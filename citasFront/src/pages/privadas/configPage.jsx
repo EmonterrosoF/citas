@@ -1,13 +1,20 @@
 import { Card, CardBody, Skeleton } from "@nextui-org/react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { toast, ToastContainer } from "react-toastify";
 import { obtenerHorarioLaboral } from "../../services/configuraciones";
 import FormConfig from "../../components/formConfig";
 
+import { AuthContext } from "../../context/authProvider";
+import { useNavigate } from "react-router-dom";
+
 export default function ConfigPage() {
   const [horario, setHorario] = useState({});
   const [isLoading, setIsLoding] = useState(true);
+
+  const { user } = useContext(AuthContext);
+
+  const navigate = useNavigate();
 
   async function getHorarioLaboral() {
     setIsLoding(true);
@@ -24,6 +31,8 @@ export default function ConfigPage() {
   }
 
   useEffect(() => {
+    if (user?.rol !== "ADMIN") return navigate("/panel");
+
     getHorarioLaboral();
   }, []);
   return (

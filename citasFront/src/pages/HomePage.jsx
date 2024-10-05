@@ -23,10 +23,11 @@ import { I18nProvider } from "@react-aria/i18n";
 import { obtenerServiciosCliente } from "../services/servicios";
 import { obtenerProveedoresPorServicio } from "../services/usuarios";
 import {
-  guardarCita,
+  guardarCitaCliente,
   obtenerCitasPorProveedor,
   obtenerDiasNoLaborales,
   obtenerHorariosDisponiblesPorFecha,
+  preGuardarCitaCliente,
 } from "../services/citas";
 
 import { format } from "@formkit/tempo";
@@ -41,8 +42,9 @@ import imagenBarberia from "../assets/barberia.jpg";
 import { today, getLocalTimeZone } from "@internationalized/date";
 
 import { diasDeLaSemana } from "../utils/diasDeLaSemana";
+import PinField from "react-pin-field";
 
-const nombreEmpresa = "PRUEBA S.A.";
+const nombreEmpresa = "THE KING BARBER";
 function HomePage() {
   const [selectedTab, setSelectedTab] = useState("step1");
 
@@ -107,6 +109,12 @@ function HomePage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [mensajeModal, setMensajeModal] = useState(null);
 
+  const [token, setToken] = useState("");
+  const [isValidToken, setIsValidToken] = useState(false);
+
+  // para mostrar modal
+  const [isOpenConfirmacion, setIsOpenConfirmacion] = useState(false);
+
   async function getServicios() {
     // reinicar todo los campos por defecto
     setIsDisabledSelectProveedores(true);
@@ -163,6 +171,8 @@ function HomePage() {
 
     setIsLoadingProveedores(true);
     const data = await obtenerProveedoresPorServicio(e.target.value);
+
+    setDefaultSelectedIdProveedor(["0"]);
 
     if (!data.ocurrioError) {
       console.log(proveedores);
@@ -344,6 +354,24 @@ function HomePage() {
     if (valor.length < 120) setNotas(valor);
   };
 
+  const presubmitDatosCita = async (e) => {
+    setIsLoadingButton(true);
+    e.preventDefault();
+
+    const correoCliente = correo;
+
+    const data = await preGuardarCitaCliente(correoCliente, nombre);
+
+    if (!data.ocurrioError) {
+      setIsOpenConfirmacion(true);
+      toast.success(data.mensaje);
+    } else {
+      toast.error(data.mensaje);
+    }
+
+    setIsLoadingButton(false);
+  };
+
   const submitDatosCita = async (e) => {
     setIsLoadingButton(true);
     e.preventDefault();
@@ -362,7 +390,7 @@ function HomePage() {
     const telefonoCliente = telefono;
     const notasCLiente = notas;
 
-    const data = await guardarCita(
+    const data = await guardarCitaCliente(
       idServicio,
       duracionServicio,
       idProveedor,
@@ -372,11 +400,13 @@ function HomePage() {
       apellidoCliente,
       correoCliente,
       telefonoCliente,
-      notasCLiente
+      notasCLiente,
+      token
     );
 
     if (!data.ocurrioError) {
       onOpen(true);
+      setIsOpenConfirmacion(false);
 
       toast.success(
         `${data.mensaje} para el dia ${format(
@@ -451,7 +481,7 @@ function HomePage() {
         <ToastContainer />
         <Card className=" mx-auto p-10 lg:w-[700px] md:w-[700px] ">
           <CardBody className="">
-            <form onSubmit={submitDatosCita}>
+            <form onSubmit={presubmitDatosCita}>
               <Tabs
                 fullWidth
                 size="md"
@@ -892,6 +922,77 @@ function HomePage() {
                   >
                     Realizar una nueva cita
                   </Button>
+                </ModalBody>
+              </>
+            )}
+          </ModalContent>
+        </Modal>
+        <Modal
+          backdrop="blur"
+          size="xl"
+          isOpen={isOpenConfirmacion}
+          onOpenChange={setIsOpenConfirmacion}
+          isDismissable={false}
+          isKeyboardDismissDisabled
+          hideCloseButton
+          motionProps={{
+            variants: {
+              enter: {
+                y: 0,
+                opacity: 1,
+                transition: {
+                  duration: 0.3,
+                  ease: "easeOut",
+                },
+              },
+              exit: {
+                y: -20,
+                opacity: 0,
+                transition: {
+                  duration: 0.2,
+                  ease: "easeIn",
+                },
+              },
+            },
+          }}
+        >
+          <ModalContent>
+            {() => (
+              <>
+                <ModalHeader className="flex flex-col gap-1">
+                  Confirmar Cita
+                </ModalHeader>
+                <ModalBody>
+                  <form onSubmit={submitDatosCita}>
+                    <div className="text-center my-10">
+                      <div className="flex flex-col items-center justify-center">
+                        <h2 className="text-2xl font-bold mb-4">
+                          Introduce tu código de verificación
+                        </h2>
+                        <div className="flex  items-center justify-center">
+                          <PinField
+                            autoFocus
+                            length={6}
+                            className=" w-12 h-12 text-2xl border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-500 text-center mx-1"
+                            onChange={(value) => {
+                              setIsValidToken(value.length === 6);
+                              setToken(value);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 justify-end py-5">
+                      <Button
+                        type="submit"
+                        fullWidth
+                        color="primary"
+                        isDisabled={!isValidToken || isLoadingButton}
+                      >
+                        Continuar
+                      </Button>
+                    </div>
+                  </form>
                 </ModalBody>
               </>
             )}
