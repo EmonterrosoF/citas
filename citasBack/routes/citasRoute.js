@@ -6,15 +6,21 @@ import {
   getdiasNoLaborales,
   getHorarioDisponiblePorFecha,
   guardarCita,
+  preGuardarCitaCliente,
+  guardarCitaCliente,
 } from "../controllers/citasController.js";
+
+import { admin, estaLogueado } from "../middleware/authMiddleware.js";
 
 const citasRoute = Router();
 
 citasRoute.get("/proveedor/:id", getCitasReservadasProveedor);
 citasRoute.get("/diasNoLaborales", getdiasNoLaborales);
 citasRoute.get("/horarioDisponible", getHorarioDisponiblePorFecha);
-citasRoute.post("/guardarCitaCliente", guardarCita);
-citasRoute.post("/guardarCita", guardarCita);
-citasRoute.delete("/cancelarCita", cancelarCita);
+citasRoute.post("/preguardarCitaCliente", preGuardarCitaCliente);
+citasRoute.post("/guardarCitaCliente", guardarCitaCliente);
+
+citasRoute.post("/guardarCita", estaLogueado, admin, guardarCita);
+citasRoute.post("/cancelarCita", estaLogueado, admin, cancelarCita);
 
 export default citasRoute;

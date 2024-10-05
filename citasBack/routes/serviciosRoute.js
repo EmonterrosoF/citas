@@ -7,15 +7,31 @@ import {
   getServiciosPorUsuario,
   guardarServicio,
 } from "../controllers/serviciosController.js";
+import { admin, estaLogueado } from "../middleware/authMiddleware.js";
 
 const serviciosRoute = Router();
 
 serviciosRoute.get("/obtenerServiciosCliente", getServiciosCliente);
-serviciosRoute.get("/", getServicios);
-serviciosRoute.get("/obtenerServiciosPorUsuario/:id", getServiciosPorUsuario);
+serviciosRoute.get("/", estaLogueado, getServicios);
+serviciosRoute.get(
+  "/obtenerServiciosPorUsuario/:id",
+  estaLogueado,
+  admin,
+  getServiciosPorUsuario
+);
 
-serviciosRoute.post("/guardarServicio", guardarServicio);
-serviciosRoute.put("/actualizarServicio", actualizarServicio);
-serviciosRoute.delete("/eliminarServicio/:id", eliminarServicio);
+serviciosRoute.post("/guardarServicio", estaLogueado, admin, guardarServicio);
+serviciosRoute.put(
+  "/actualizarServicio",
+  estaLogueado,
+  admin,
+  actualizarServicio
+);
+serviciosRoute.delete(
+  "/eliminarServicio/:id",
+  estaLogueado,
+  admin,
+  eliminarServicio
+);
 
 export default serviciosRoute;

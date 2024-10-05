@@ -4,10 +4,17 @@ import {
   guardarHorarioLaboral,
 } from "../controllers/configuracionesController.js";
 
+import { admin, estaLogueado } from "../middleware/authMiddleware.js";
+
 const configRoute = Router();
 
-configRoute.get("/horarioLaboral", getHorarioLaboral);
+configRoute.get("/horarioLaboral", estaLogueado, admin, getHorarioLaboral);
 
-configRoute.put("/guardarHorarioLaboral", guardarHorarioLaboral);
+configRoute.put(
+  "/guardarHorarioLaboral",
+  estaLogueado,
+  admin,
+  guardarHorarioLaboral
+);
 
 export default configRoute;
