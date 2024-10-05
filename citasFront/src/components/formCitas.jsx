@@ -1,11 +1,12 @@
 /* eslint-disable react/prop-types */
 import { Input, Textarea, Button, Select, SelectItem } from "@nextui-org/react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 import dayjs from "dayjs";
 import { cancelarCita, guardarCita } from "../services/citas";
 
 import { toast } from "react-toastify";
+import { AuthContext } from "../context/authProvider";
 
 export default function FormCitas({
   cita,
@@ -59,6 +60,8 @@ export default function FormCitas({
   );
   const [serviciosList, setServiciosList] = useState(servicios);
   console.log("servicios nuevo", serviciosList);
+
+  const { user } = useContext(AuthContext);
 
   // change formulario persona
   const changeNombre = (valor) => {
@@ -144,9 +147,12 @@ export default function FormCitas({
     e.preventDefault();
     setisLoadingSubmit(true);
     if (idCita) {
-      const data = await toast.promise(cancelarCita(idCita, nota), {
-        pending: "Cargando...",
-      });
+      const data = await toast.promise(
+        cancelarCita(idCita, nota, correo, nombre),
+        {
+          pending: "Cargando...",
+        }
+      );
 
       if (!data.ocurrioError) {
         getCitas();
@@ -306,7 +312,7 @@ export default function FormCitas({
         onValueChange={changeNotasCliente}
       />
 
-      {idCita && (
+      {idCita && user.rol === "ADMIN" && (
         <Textarea
           isRequired
           label="Nota para el cliente"
@@ -339,15 +345,17 @@ export default function FormCitas({
       >
         Confirmar cita
       </Button>
-      <Button
-        style={{ marginBottom: "10px" }}
-        className={` py-6 ${!idCita ? `hidden` : ``}`}
-        color="danger"
-        isDisabled={!nota || isLoadingSubmit}
-        type="submit"
-      >
-        Cancelar cita
-      </Button>
+      {user.rol === "ADMIN" && (
+        <Button
+          style={{ marginBottom: "10px" }}
+          className={` py-6 ${!idCita ? `hidden` : ``}`}
+          color="danger"
+          isDisabled={!nota || isLoadingSubmit}
+          type="submit"
+        >
+          Cancelar cita
+        </Button>
+      )}
     </form>
   );
 }
