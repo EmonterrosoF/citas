@@ -14,6 +14,7 @@ import RecuperarPage from "./pages/privadas/RecuperarPage";
 import { AuthProvider } from "./context/authProvider";
 import ProtectedRoute from "./components/protectedRoute";
 import VerificateIsLogin from "./components/verificateIsLogin";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -53,6 +54,8 @@ function App() {
               </VerificateIsLogin>
             }
           />
+          {/* Ruta para manejar las páginas no encontradas */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
