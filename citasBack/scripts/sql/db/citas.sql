@@ -29,6 +29,19 @@ CREATE TABLE `usuarios` (
   KEY `id_roles` (`id_rol`),
   CONSTRAINT `usuarios_roles` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+-- Tabla para guardar los tokens para verificación del login
+DROP TABLE IF EXISTS `tokens`;
+CREATE TABLE `tokens` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `id_usuario` INT NULL,
+  `fecha_creacion` DATETIME DEFAULT NOW(),
+  `token` VARCHAR(256) NOT NULL,
+  `correo` VARCHAR(256) NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tokens_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 -- Tabla de configuraciones usuario
 DROP TABLE IF EXISTS `usuarios_configuraciones`;
 CREATE TABLE `usuarios_configuraciones` (
@@ -37,6 +50,7 @@ CREATE TABLE `usuarios_configuraciones` (
   `fecha_actualizacion` datetime DEFAULT NOW(),
   `usuario` varchar(256) DEFAULT NULL,
   `password` varchar(512) DEFAULT NULL,
+  `primer_login` tinyint DEFAULT '1', 
   `plan_trabajo` text,
   PRIMARY KEY (`id_usuario`),
   CONSTRAINT `usuarios_configuraciones_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

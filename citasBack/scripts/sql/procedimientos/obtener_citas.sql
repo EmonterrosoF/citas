@@ -1,7 +1,7 @@
 USE `citas`;
 DROP procedure IF EXISTS `obtener_citas`;
 DELIMITER $$ 
-CREATE PROCEDURE `obtener_citas` () BEGIN
+CREATE PROCEDURE `obtener_citas` (rol VARCHAR(250), idUsuario INT) BEGIN
 	UPDATE citas 
 		SET estado = 'VENCIDA'
 		WHERE fecha_inicio < NOW();
@@ -23,5 +23,6 @@ CREATE PROCEDURE `obtener_citas` () BEGIN
     ON c.id_servicio = s.id
     INNER JOIN clientes AS cli
     ON cli.id = c.id_usuario_cliente
-	WHERE estado = 'RESERVADA';
+	WHERE estado = 'RESERVADA'
+	AND (rol = 'ADMIN' OR c.id_usuario_proveedor = idUsuario);
 END $$

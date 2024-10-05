@@ -19,7 +19,7 @@ VALUES(
 -- insertar rol
 INSERT INTO `citas`.`roles` (`nombre`, `tipo`)
 VALUES ('administrador', 'ADMIN'),
-    ('colaborador', 'usuario');
+    ('colaborador', 'USUARIO');
 
 -- insertar usuario
 INSERT INTO `citas`.`usuarios` (
@@ -38,7 +38,7 @@ VALUES (
         '45657654',
         'chiquimulilla',
         0,
-        2
+        1
     );
 
     -- insertar usuarios_configuraciones
@@ -50,7 +50,7 @@ INSERT INTO `citas`.`usuarios_configuraciones` (
 VALUES (
         1,
         'mario',
-        '123456'
+        '$2a$10$IMAb33aVjqKVANHyFcCtkOqMNEqYdB3ojpuowdm3IJhMGekDPaG0q'
     );
 
 -- relacionar servicio con usuario
