@@ -3,6 +3,8 @@ import {
   SP_CITAS_RESERVADAS,
   SP_CITAS_RESERVADAS_POR_FECHA,
   SP_GUARDAR_CITA,
+  SP_GUARDAR_CITA_CLIENTE,
+  SP_GUARDAR_TOKEN_CITA,
   SP_HORARIO_LABORAL,
 } from "../utils/sp.js";
 import { ejecutarSP } from "../data/dbConexion.js";
@@ -15,6 +17,39 @@ const diasDeLaSemana = {
   5: "sabado",
   6: "domingo",
 };
+
+import generadorDeCodigo from "../utils/generadorDeCodigo.js";
+import generadorCorreo from "../utils/generadorCorreo.js";
+
+// Función para formatear la fecha al formato requerido por Google Calendar
+function formatDateToGoogleCalendar(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${year}${month}${day}T${hours}${minutes}${seconds}`;
+}
+
+// Función para generar el enlace de Google Calendar
+function generateGoogleCalendarLink({
+  nombreEmpresa,
+  fechaInicio,
+  fechaFin,
+  notas,
+}) {
+  const baseUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE";
+  const text = `Cita agendada en ${encodeURIComponent(nombreEmpresa)}`;
+  const dates = `${formatDateToGoogleCalendar(
+    fechaInicio
+  )}/${formatDateToGoogleCalendar(fechaFin)}`;
+  const location = encodeURIComponent(nombreEmpresa);
+  const details = encodeURIComponent(notas);
+
+  return `${baseUrl}&text=${text}&dates=${dates}&location=${location}&details=${details}`;
+}
 
 export const getCitasReservadasProveedor = async (req, res, next) => {
   try {
@@ -246,7 +281,6 @@ export const getHorarioDisponiblePorFecha = async (req, res, next) => {
     next(error);
   }
 };
-
 export const guardarCita = async (req, res, next) => {
   try {
     const {
@@ -263,22 +297,8 @@ export const guardarCita = async (req, res, next) => {
       fechaFin,
     } = req.body;
 
-    let fechaInicioCompleta = null;
-    let fechaFinal = null;
-
-    if (!fechaFin) {
-      // Combinar fechaInicio y hora para crear un objeto new Date
-      const [hours, minutes] = hora.split(":");
-
-      fechaInicioCompleta = new Date(`${fechaInicio}T${hora}`);
-
-      // Calcular la fecha final sumando la duración del servicio (en minutos)
-      fechaFinal = new Date(fechaInicioCompleta);
-      fechaFinal.setMinutes(fechaFinal.getMinutes() + duracionServicio);
-    } else {
-      fechaInicioCompleta = new Date(fechaInicio);
-      fechaFinal = new Date(fechaFin);
-    }
+    const fechaInicioCompleta = new Date(fechaInicio);
+    const fechaFinal = new Date(fechaFin);
 
     await ejecutarSP(SP_GUARDAR_CITA, [
       idServicio,
@@ -291,6 +311,72 @@ export const guardarCita = async (req, res, next) => {
       telefonoCliente,
       notasCLiente,
     ]);
+
+    const nombreEmpresa = "THE KING BARBER";
+
+    // Generar el enlace de Google Calendar
+    const googleCalendarLink = generateGoogleCalendarLink({
+      nombreEmpresa,
+      fechaInicio: fechaInicioCompleta,
+      fechaFin: fechaFinal,
+      notas: notasCLiente,
+    });
+
+    const titulo = `Tu cita con ${nombreEmpresa} ha sido confirmada`;
+
+    const htmlContent = `
+      <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+          <div style="background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center;">
+            <img src="https://scontent-dfw5-2.xx.fbcdn.net/v/t39.30808-6/302075580_591681799070646_3545406768882047780_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=rbd7EIrYOEEQ7kNvgHKnpsk&_nc_ht=scontent-dfw5-2.xx&_nc_gid=Ak6eBvjKhx9YYuLU6wOQIrH&oh=00_AYD9_zvVllLGg6Gm5e2BJDjx6YlRHhq7YrGLl45hhBcLMA&oe=6702C348" 
+                 alt="${nombreEmpresa}" style="width: 150px; margin-bottom: 20px;" />
+            <h1 style="color: #333;">¡Hola, ${nombreCliente}!</h1>
+            <p style="font-size: 16px; color: #555;">Tu cita con <strong>${nombreEmpresa}</strong> ha sido confirmada.</p>
+            <p style="font-size: 16px; color: #555;">Detalles de la cita:</p>
+            <table style="width: 100%; margin-top: 20px; text-align: left; font-size: 14px;">
+              <tr>
+                <td><strong>Fecha:</strong></td>
+                <td>${fechaInicioCompleta.toLocaleDateString()}</td>
+              </tr>
+              <tr>
+                <td><strong>Hora de inicio:</strong></td>
+                <td>${fechaInicioCompleta.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}</td>
+              </tr>
+              <tr>
+                <td><strong>Hora de finalización:</strong></td>
+                <td>${fechaFinal.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}</td>
+              </tr>
+              <tr>
+                <td><strong>Cliente:</strong></td>
+                <td>${nombreCliente} ${apellidoCliente}</td>
+              </tr>
+              <tr>
+                <td><strong>Teléfono:</strong></td>
+                <td>${telefonoCliente}</td>
+              </tr>
+              <tr>
+                <td><strong>Notas:</strong></td>
+                <td>${notasCLiente || "Ninguna"}</td>
+              </tr>
+            </table>
+            <p style="font-size: 16px; color: #555;">Puedes guardar un rocordatorio en el siguiente enlace:</p>
+            <div style="margin-top: 30px;">
+              <a href="${googleCalendarLink}" target="_blank" style="padding: 10px 20px; background-color: #4285F4; color: white; text-decoration: none; border-radius: 5px; font-size: 16px;">Añadir a Google Calendar</a>
+            </div>
+            <p style="font-size: 14px; color: #888; margin-top: 20px;">Si no realizaste esta reservación, por favor contacta con nosotros.</p>
+            <p style="font-size: 16px; color: #333; margin-top: 30px;">Saludos,<br>El equipo de ${nombreEmpresa}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await generadorCorreo(titulo, htmlContent, correoCliente, nombreCliente);
 
     res.json({
       resultado: null,
@@ -306,11 +392,212 @@ export const guardarCita = async (req, res, next) => {
   }
 };
 
+export const guardarCitaCliente = async (req, res, next) => {
+  try {
+    const {
+      idServicio,
+      duracionServicio,
+      idProveedor,
+      fechaInicio,
+      hora,
+      nombreCliente,
+      apellidoCliente,
+      correoCliente,
+      telefonoCliente,
+      notasCLiente,
+      token,
+    } = req.body;
+
+    const fechaInicioCompleta = new Date(`${fechaInicio}T${hora}`);
+
+    // Calcular la fecha final sumando la duración del servicio (en minutos)
+    let fechaFinal = new Date(fechaInicioCompleta);
+    fechaFinal.setMinutes(fechaFinal.getMinutes() + duracionServicio);
+
+    await ejecutarSP(SP_GUARDAR_CITA_CLIENTE, [
+      idServicio,
+      idProveedor,
+      fechaInicioCompleta,
+      fechaFinal,
+      nombreCliente,
+      apellidoCliente,
+      correoCliente,
+      telefonoCliente,
+      notasCLiente,
+      token,
+    ]);
+
+    const nombreEmpresa = "THE KING BARBER";
+
+    // Generar el enlace de Google Calendar
+    const googleCalendarLink = generateGoogleCalendarLink({
+      nombreEmpresa,
+      fechaInicio: fechaInicioCompleta,
+      fechaFin: fechaFinal,
+      notas: notasCLiente,
+    });
+
+    const titulo = `Tu cita con ${nombreEmpresa} ha sido confirmada`;
+
+    const htmlContent = `
+      <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+          <div style="background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center;">
+            <img src="https://scontent-dfw5-2.xx.fbcdn.net/v/t39.30808-6/302075580_591681799070646_3545406768882047780_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=rbd7EIrYOEEQ7kNvgHKnpsk&_nc_ht=scontent-dfw5-2.xx&_nc_gid=Ak6eBvjKhx9YYuLU6wOQIrH&oh=00_AYD9_zvVllLGg6Gm5e2BJDjx6YlRHhq7YrGLl45hhBcLMA&oe=6702C348" 
+                 alt="${nombreEmpresa}" style="width: 150px; margin-bottom: 20px;" />
+            <h1 style="color: #333;">¡Hola, ${nombreCliente}!</h1>
+            <p style="font-size: 16px; color: #555;">Tu cita con <strong>${nombreEmpresa}</strong> ha sido confirmada.</p>
+            <p style="font-size: 16px; color: #555;">Detalles de la cita:</p>
+            <table style="width: 100%; margin-top: 20px; text-align: left; font-size: 14px;">
+              <tr>
+                <td><strong>Fecha:</strong></td>
+                <td>${fechaInicioCompleta.toLocaleDateString()}</td>
+              </tr>
+              <tr>
+                <td><strong>Hora de inicio:</strong></td>
+                <td>${fechaInicioCompleta.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}</td>
+              </tr>
+              <tr>
+                <td><strong>Hora de finalización:</strong></td>
+                <td>${fechaFinal.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}</td>
+              </tr>
+              <tr>
+                <td><strong>Cliente:</strong></td>
+                <td>${nombreCliente} ${apellidoCliente}</td>
+              </tr>
+              <tr>
+                <td><strong>Teléfono:</strong></td>
+                <td>${telefonoCliente}</td>
+              </tr>
+              <tr>
+                <td><strong>Notas:</strong></td>
+                <td>${notasCLiente || "Ninguna"}</td>
+              </tr>
+            </table>
+            <p style="font-size: 16px; color: #555;">Puedes guardar un rocordatorio en el siguiente enlace:</p>
+            <div style="margin-top: 30px;">
+              <a href="${googleCalendarLink}" target="_blank" style="padding: 10px 20px; background-color: #4285F4; color: white; text-decoration: none; border-radius: 5px; font-size: 16px;">Añadir a Google Calendar</a>
+            </div>
+            <p style="font-size: 14px; color: #888; margin-top: 20px;">Si no realizaste esta reservación, por favor contacta con nosotros.</p>
+            <p style="font-size: 16px; color: #333; margin-top: 30px;">Saludos,<br>El equipo de ${nombreEmpresa}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await generadorCorreo(titulo, htmlContent, correoCliente, nombreCliente);
+
+    res.json({
+      resultado: null,
+      ocurrioError: false,
+      mensaje: `Cita reservada exitosamente`,
+    });
+  } catch (err) {
+    console.log(err);
+    if (
+      err
+        .toString()
+        .includes("Token de verificación no válido o no encontrado.")
+    ) {
+      const error = new Error(
+        "Token de verificación no válido o no encontrado."
+      );
+      return next(error);
+    }
+    const error = new Error(
+      "Ha ocurrido un error, por favor intenta mas tarde"
+    );
+    next(error);
+  }
+};
+
+export const preGuardarCitaCliente = async (req, res, next) => {
+  try {
+    const { correoCliente, nombre } = req.body;
+
+    const token = generadorDeCodigo();
+
+    const titulo = `Verificación de token para confirmar cita`;
+    const htmlContent = `
+      <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; text-align: center;">
+          <div style="background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            <img src="https://scontent-dfw5-2.xx.fbcdn.net/v/t39.30808-6/302075580_591681799070646_3545406768882047780_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=rbd7EIrYOEEQ7kNvgHKnpsk&_nc_ht=scontent-dfw5-2.xx&_nc_gid=Ak6eBvjKhx9YYuLU6wOQIrH&oh=00_AYD9_zvVllLGg6Gm5e2BJDjx6YlRHhq7YrGLl45hhBcLMA&oe=6702C348" alt="THE KING BARBER" style="width: 150px; margin-bottom: 20px;" />
+            <h1 style="color: #333;">Hola, ${nombre}!</h1>
+            <p style="font-size: 16px; color: #555;">Recibimos una solicitud para reservar una cita.</p>
+            <p style="font-size: 16px; color: #555;">Por favor, introduce el siguiente código de verificación para continuar:</p>
+            <div style="background-color: #007bff; color: #fff; padding: 10px 20px; font-size: 24px; font-weight: bold; letter-spacing: 2px; border-radius: 5px; display: inline-block; margin-top: 20px;">
+              ${token}
+            </div>
+            <p style="font-size: 14px; color: #888; margin-top: 20px;">Si no solicitaste este código, por favor ignora este mensaje, y ponte en contacto con el administrador.</p>
+            <p style="font-size: 16px; color: #333; margin-top: 30px;">Saludos,<br>El equipo de THE KING BARBER</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await generadorCorreo(titulo, htmlContent, correoCliente, nombre);
+
+    await ejecutarSP(SP_GUARDAR_TOKEN_CITA, [correoCliente, token]);
+
+    res.json({
+      resultado: null,
+      ocurrioError: false,
+      mensaje: "La pre agenda de la cita fue exitosa",
+    });
+  } catch (err) {
+    console.log(err);
+    const error = new Error(
+      "Ha ocurrido un error, por favor intenta mas tarde"
+    );
+    next(error);
+  }
+};
+
 export const cancelarCita = async (req, res, next) => {
-  const { idCita, nota } = req.body;
+  const { idCita, nota, correoCliente, nombreCliente } = req.body;
+
+  console.log("valores", idCita, nota);
 
   try {
     await ejecutarSP(SP_CANCELAR_CITA, [idCita, nota]);
+
+    const nombreEmpresa = "THE KING BARBER";
+    const googleCalendarURL = "https://calendar.google.com/calendar/r";
+
+    const titulo = `Tu cita con ${nombreEmpresa} ha sido cancelada`;
+
+    const htmlContent = `
+      <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+          <div style="background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center;">
+            <h1 style="color: #333;">¡Hola ${nombreCliente}!</h1>
+            <p style="font-size: 16px; color: #555;">Lamentamos informarte que tu cita con <strong>${nombreEmpresa}</strong> ha sido cancelada.</p>
+            <p style="font-size: 16px; color: #555;">Motivo de la cancelación: <strong>${
+              nota || "No se especificó un motivo."
+            }</strong> 
+            </p>
+            <p style="font-size: 16px; color: #555;">Te invitamos a reprogramar tu cita en otro momento.</p>
+            
+            <p style="font-size: 16px; color: #555;">Si habías agregado la cita a tu Google Calendar, te recordamos que también deberías cancelarla manualmente accediendo a tu calendario:</p>
+            <div style="margin-top: 20px;">
+              <a href="${googleCalendarURL}" target="_blank" style="padding: 10px 20px; background-color: #4285F4; color: white; text-decoration: none; border-radius: 5px; font-size: 16px;">Ir a Google Calendar</a>
+            </div>
+            <p style="font-size: 16px; color: #555; margin-top: 20px;">Por favor, asegúrate de eliminar el evento en tu Google Calendar si ya lo habías añadido.</p>
+
+            <p style="font-size: 16px; color: #333; margin-top: 30px;">Saludos,<br>El equipo de ${nombreEmpresa}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await generadorCorreo(titulo, htmlContent, correoCliente, nombreCliente);
 
     res.json({
       resultado: null,
