@@ -24,7 +24,7 @@ CREATE TABLE `usuarios` (
   `telefono` varchar(128) DEFAULT NULL,
   `direccion` varchar(256) DEFAULT NULL,
   `privado` tinyint DEFAULT '0',
-  `id_rol` int DEFAULT NULL,
+  `id_rol` int DEFAULT 2,
   PRIMARY KEY (`id`),
   KEY `id_roles` (`id_rol`),
   CONSTRAINT `usuarios_roles` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
