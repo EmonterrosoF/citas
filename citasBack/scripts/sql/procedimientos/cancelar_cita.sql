@@ -23,9 +23,10 @@ CREATE PROCEDURE `cancelar_cita` (idCita INT, notaCliente TEXT) BEGIN
 	-- Iniciar la transacción
 	START TRANSACTION;
 
-		UPDATE citas 
+		UPDATE citas
 			SET estado = 'CANCELADA',
-				notas = notaCliente
+				notas = notaCliente,
+                fecha_actualizacion = NOW()
 			WHERE id = idCita;
 
 	-- Confirmar la transacción

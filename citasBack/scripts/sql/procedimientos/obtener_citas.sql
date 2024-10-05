@@ -3,7 +3,8 @@ DROP procedure IF EXISTS `obtener_citas`;
 DELIMITER $$ 
 CREATE PROCEDURE `obtener_citas` (rol VARCHAR(250), idUsuario INT) BEGIN
 	UPDATE citas 
-		SET estado = 'VENCIDA'
+		SET estado = 'VENCIDA',
+			fecha_actualizacion = NOW()
 		WHERE fecha_inicio < NOW();
         
 	SELECT 
