@@ -24,6 +24,8 @@ export const SP_OBTENER_USUARIO = "obtener_usuario";
 export const SP_PRE_AUTENTICAR = "pre_autenticar";
 export const SP_GUARDAR_TOKEN = "guardar_token";
 export const SP_AUTENTICAR = "autenticar";
+export const SP_RECUPERAR_USUARIO = "recuperar_usuario";
+
 // --------------------------------------------------
 
 // pendientes

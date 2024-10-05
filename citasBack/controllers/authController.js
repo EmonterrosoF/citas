@@ -10,10 +10,12 @@ import { ejecutarSP } from "../data/dbConexion.js";
 import generadorCorreo from "../utils/generadorCorreo.js";
 import generadorDeCodigo from "../utils/generadorDeCodigo.js";
 import generateToken from "../utils/generadorToken.js";
+import generarPassword from "../utils/generarPassword.js";
 import {
   SP_AUTENTICAR,
   SP_GUARDAR_TOKEN,
   SP_PRE_AUTENTICAR,
+  SP_RECUPERAR_USUARIO,
 } from "../utils/sp.js";
 
 import bcrypt from "bcryptjs";
@@ -356,6 +358,75 @@ export const refreshToken = async (req, res, next) => {
 
     const error = new Error(
       "Ha ocurrido un error, por favor intenta nuevamente o mas tarde"
+    );
+    next(error);
+  }
+};
+
+export const recuperarUsuario = async (req, res, next) => {
+  try {
+    const { correo, usuario } = req.body;
+
+    // Generar una nueva contraseña temporal
+    const passwordTextoPlano = generarPassword();
+    // Encriptar la contraseña
+    // encriptacion de contraseña
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(passwordTextoPlano, salt);
+
+    const resultado = await ejecutarSP(SP_RECUPERAR_USUARIO, [
+      correo,
+      usuario,
+      password,
+    ]);
+
+    if (!resultado || resultado.length < 1) {
+      res.status(400);
+      const error = new Error("Usuario o correo no son correctos");
+      return next(error);
+    }
+
+    const nombreEmpresa = "THE KING BARBER";
+
+    // Contenido del correo
+    const titulo = "Recuperación de Contraseña";
+    const htmlContent = `
+          <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+              <div style="max-width: 600px; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                <h2 style="color: #333; text-align: center;">¡Hola!</h2>
+                <p style="color: #555; font-size: 16px; text-align: center;">Hemos recibido una solicitud para restablecer tu contraseña. A continuación, encontrarás tu nueva contraseña temporal:</p>
+                
+                <p style="background-color: #e3f2fd; color: #0d47a1; padding: 15px; border-radius: 5px; font-size: 18px; text-align: center; font-weight: bold;">
+                  ${passwordTextoPlano}
+                </p>
+                
+                <p style="color: #555; font-size: 16px;">Te recomendamos cambiar esta contraseña tan pronto como inicies sesión para asegurar tu cuenta.</p>
+                
+                <p style="color: #555; font-size: 16px;">Si no solicitaste este cambio, por favor contacta con nosotros de inmediato.</p>
+                
+                <p style="color: #555; font-size: 16px; text-align: center;">Saludos,</p>
+                <p style="color: #333; font-size: 16px; font-weight: bold; text-align: center;">El equipo de ${nombreEmpresa}</p>
+                
+                <hr style="border: none; border-top: 1px solid #ddd;">
+                <p style="font-size: 12px; color: #888; text-align: center;">
+                  Si tienes alguna duda, no dudes en ponerte en contacto con nosotros.
+                </p>
+              </div>
+            </body>
+          </html>`;
+
+    await generadorCorreo(titulo, htmlContent, correo, usuario);
+
+    res.json({
+      resultado: null,
+      ocurrioError: false,
+      mensaje: `Se restablecio tu contraseña y se envio un correo electrónico con la información`,
+    });
+  } catch (err) {
+    console.log(err);
+    const error = new Error(
+      "Ha ocurrido un error, por favor intenta mas tarde"
     );
     next(error);
   }

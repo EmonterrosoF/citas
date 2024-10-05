@@ -259,3 +259,24 @@ export const actualizarPerfil = async (
     return error.response.data;
   }
 };
+
+export const recuperarUsuario = async (correo, usuario) => {
+  try {
+    const { data } = await http.post(`api/auth/recuperarUsuario`, {
+      correo,
+      usuario,
+    });
+
+    return data;
+  } catch (error) {
+    if (error.code === "ERR_NETWORK") {
+      return {
+        ocurrioError: true,
+        mensaje:
+          "Tiempo de respuesta agotado, por favor revisa tu conexion a internet o intenta nuevamente o mas tarde",
+        resultado: null,
+      };
+    }
+    return error.response.data;
+  }
+};
