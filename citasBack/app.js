@@ -8,6 +8,7 @@ import serviciosRoute from "./routes/serviciosRoute.js";
 import usuariosRoute from "./routes/usuariosRoute.js";
 import citasRoute from "./routes/citasRoute.js";
 import configRoute from "./routes/configRoute.js";
+import authRoute from "./routes/authRoute.js";
 
 // import reportesRoute from "./routes/reportesRoute.js";
 
@@ -24,7 +25,7 @@ app.use(
 
 app.use(cookieParser());
 
-// app.use("/api/auth", authRoute);
+app.use("/api/auth", authRoute);
 
 // servicios
 app.use("/api/servicios", serviciosRoute);
