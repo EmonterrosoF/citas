@@ -34,6 +34,7 @@ export default function Layout() {
     { modulo: "Clientes", to: "/panel/clientes", rol: "ADMIN" },
     { modulo: "Servicios", to: "/panel/servicios", rol: "ADMIN" },
     { modulo: "Usuarios", to: "/panel/usuarios", rol: "ADMIN" },
+    { modulo: "Bitacora de citas", to: "/panel/bitacoraCitas", rol: "ADMIN" },
   ];
 
   const navigate = useNavigate();
@@ -119,6 +120,13 @@ export default function Layout() {
             {user.rol === "ADMIN" && (
               <Link color="foreground" to={"/panel/usuarios"}>
                 Usuarios
+              </Link>
+            )}
+          </NavbarItem>
+          <NavbarItem>
+            {user.rol === "ADMIN" && (
+              <Link color="foreground" to={"/panel/bitacoraCitas"}>
+                Bitacora de citas
               </Link>
             )}
           </NavbarItem>

@@ -6,6 +6,7 @@ import {
   SP_GUARDAR_CITA_CLIENTE,
   SP_GUARDAR_TOKEN_CITA,
   SP_HORARIO_LABORAL,
+  SP_OBTENER_BITACORA_CITAS,
 } from "../utils/sp.js";
 import { ejecutarSP } from "../data/dbConexion.js";
 const diasDeLaSemana = {
@@ -608,6 +609,24 @@ export const cancelarCita = async (req, res, next) => {
     console.log(err);
     const error = new Error(
       "Ha ocurrido un error, por favor intenta mas tarde"
+    );
+    next(error);
+  }
+};
+
+export const getBitacoraCitas = async (req, res, next) => {
+  try {
+    const citas = await ejecutarSP(SP_OBTENER_BITACORA_CITAS);
+
+    res.json({
+      resultado: citas,
+      ocurrioError: false,
+      mensaje: "exito",
+    });
+  } catch (err) {
+    console.log(err);
+    const error = new Error(
+      "Ha ocurrido un error al obtener las bitacoras, por favor intenta nuevamente o mas tarde"
     );
     next(error);
   }

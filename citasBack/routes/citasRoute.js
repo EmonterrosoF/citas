@@ -8,6 +8,7 @@ import {
   guardarCita,
   preGuardarCitaCliente,
   guardarCitaCliente,
+  getBitacoraCitas,
 } from "../controllers/citasController.js";
 
 import { admin, estaLogueado } from "../middleware/authMiddleware.js";
@@ -22,5 +23,7 @@ citasRoute.post("/guardarCitaCliente", guardarCitaCliente);
 
 citasRoute.post("/guardarCita", estaLogueado, admin, guardarCita);
 citasRoute.post("/cancelarCita", estaLogueado, admin, cancelarCita);
+
+citasRoute.get("/obtenerBitacoraCitas", estaLogueado, admin, getBitacoraCitas);
 
 export default citasRoute;

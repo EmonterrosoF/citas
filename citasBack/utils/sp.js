@@ -44,3 +44,4 @@ export const SP_GUARDAR_TOKEN_CITA = "guardar_token_cita";
 
 export const SP_CANCELAR_CITA = "cancelar_cita";
 export const SP_OBTENER_CITAS = "obtener_citas";
+export const SP_OBTENER_BITACORA_CITAS = "obtener_bitacora_citas";

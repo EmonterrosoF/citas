@@ -15,6 +15,7 @@ import { AuthProvider } from "./context/authProvider";
 import ProtectedRoute from "./components/protectedRoute";
 import VerificateIsLogin from "./components/verificateIsLogin";
 import NotFoundPage from "./pages/NotFoundPage";
+import BitacoraCitasPage from "./pages/privadas/BitacoraCitas";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
             <Route path="usuarios" element={<UsuariosPage />}></Route>
             <Route path="perfil" element={<PerfilPage />}></Route>
             <Route path="configuraciones" element={<ConfigPage />}></Route>
+            <Route path="bitacoraCitas" element={<BitacoraCitasPage />}></Route>
           </Route>
           <Route
             path="/login"
