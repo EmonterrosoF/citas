@@ -206,9 +206,9 @@ export const eliminarUsuario = async (idUsuario) => {
   }
 };
 
-export const obtenerUsuario = async (idUsuario) => {
+export const obtenerUsuario = async () => {
   try {
-    const { data } = await http.get(`api/usuarios/usuario/` + idUsuario);
+    const { data } = await http.get(`api/usuarios/usuario/`);
 
     return data;
   } catch (error) {

@@ -105,11 +105,81 @@ export const guardarCita = async (
   }
 };
 
-export const cancelarCita = async (idCita, nota) => {
+export const preGuardarCitaCliente = async (correoCliente, nombre) => {
   try {
-    const { data } = await http.delete(`api/citas/cancelarCita`, {
+    const { data } = await http.post("api/citas/preGuardarCitaCliente", {
+      correoCliente,
+      nombre,
+    });
+
+    return data;
+  } catch (error) {
+    if (error.code === "ERR_NETWORK") {
+      return {
+        ocurrioError: true,
+        mensaje:
+          "Tiempo de respuesta agotado, por favor revisa tu conexion a internet o intenta nuevamente o mas tarde",
+        resultado: null,
+      };
+    }
+    return error.response.data;
+  }
+};
+
+export const guardarCitaCliente = async (
+  idServicio,
+  duracionServicio,
+  idProveedor,
+  fechaInicio,
+  hora,
+  nombreCliente,
+  apellidoCliente,
+  correoCliente,
+  telefonoCliente,
+  notasCLiente,
+  token
+) => {
+  try {
+    const { data } = await http.post(`api/citas/guardarCitaCliente`, {
+      idServicio,
+      duracionServicio,
+      idProveedor,
+      fechaInicio,
+      hora,
+      nombreCliente,
+      apellidoCliente,
+      correoCliente,
+      telefonoCliente,
+      notasCLiente,
+      token,
+    });
+
+    return data;
+  } catch (error) {
+    if (error.code === "ERR_NETWORK") {
+      return {
+        ocurrioError: true,
+        mensaje:
+          "Tiempo de respuesta agotado, por favor revisa tu conexion a internet o intenta nuevamente o mas tarde",
+        resultado: null,
+      };
+    }
+    return error.response.data;
+  }
+};
+
+export const cancelarCita = async (
+  idCita,
+  nota,
+  correoCliente,
+  nombreCliente
+) => {
+  try {
+    const { data } = await http.post(`api/citas/cancelarCita`, {
       idCita,
       nota,
+      correoCliente,
+      nombreCliente,
     });
 
     return data;
