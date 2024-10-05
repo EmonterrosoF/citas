@@ -1,15 +1,16 @@
-// import { Router } from "express";
-// import {
-//   registrarUsuario,
-//   loginUsuario,
-// } from "../controllers/authController.js";
-// import { estaLogueado } from "../middleware/authMiddleware.js";
+import { Router } from "express";
+import {
+  autenticar,
+  logout,
+  preAutenticar,
+  refreshToken,
+} from "../controllers/authController.js";
 
-// const authRouter = Router();
+const authRoute = Router();
 
-// authRouter.post("/registro", registrarUsuario);
-// authRouter.post("/login", loginUsuario);
+authRoute.post("/preAutenticar", preAutenticar);
+authRoute.post("/autenticar", autenticar);
+authRoute.get("/logout", logout);
+authRoute.get("/refreshToken", refreshToken);
 
-// // authRouter.post("/reportes", estaLogueado, loginUsuario);
-
-// export default authRouter;
+export default authRoute;
