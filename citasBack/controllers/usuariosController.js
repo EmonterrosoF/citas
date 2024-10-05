@@ -14,6 +14,10 @@ import { ejecutarSP } from "../data/dbConexion.js";
 
 import { diaMap } from "../utils/diasDeLaSemana.js";
 
+import bcrypt from "bcryptjs";
+import generadorCorreo from "../utils/generadorCorreo.js";
+import generarPassword from "../utils/generarPassword.js";
+
 export const getProveedoresPorServicio = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -36,7 +40,11 @@ export const getProveedoresPorServicio = async (req, res, next) => {
 
 export const getProveedores = async (req, res, next) => {
   try {
-    const proveedores = await ejecutarSP(SP_OBTENER_PROVEEDORES);
+    const usuario = req.usuario;
+    const proveedores = await ejecutarSP(SP_OBTENER_PROVEEDORES, [
+      usuario.rol,
+      usuario.id,
+    ]);
     res.json({
       resultado: proveedores,
       ocurrioError: false,
@@ -53,7 +61,10 @@ export const getProveedores = async (req, res, next) => {
 
 export const getCitas = async (req, res, next) => {
   try {
-    const citas = await ejecutarSP(SP_OBTENER_CITAS);
+    const usuario = req.usuario;
+
+    console.log("user", usuario);
+    const citas = await ejecutarSP(SP_OBTENER_CITAS, [usuario.rol, usuario.id]);
     res.json({
       resultado: citas,
       ocurrioError: false,
@@ -231,7 +242,17 @@ export const actualizarUsuario = async (req, res, next) => {
 
     const serviciosSeleccionados = JSON.stringify(servicios);
 
-    const password = actualizarPassword ? "123456" : null;
+    let password = null;
+    let passwordTextoPlano = null;
+
+    if (actualizarPassword) {
+      // Generar una nueva contraseña temporal
+      passwordTextoPlano = generarPassword();
+      // Encriptar la contraseña
+      // encriptacion de contraseña
+      const salt = await bcrypt.genSalt(10);
+      password = await bcrypt.hash(passwordTextoPlano, salt);
+    }
 
     const resultado = await ejecutarSP(SP_ACTUALIZAR_USUARIO, [
       idUsuario,
@@ -260,6 +281,61 @@ export const actualizarUsuario = async (req, res, next) => {
         ocurrioError: true,
         mensaje: `El correo electronico del usuario ya existe`,
       });
+    }
+
+    const nombreEmpresa = "THE KING BARBER";
+
+    // Si la contraseña fue actualizada, enviar correo con la nueva contraseña
+    if (actualizarPassword && passwordTextoPlano) {
+      const titulo = "Actualización de perfil";
+      const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        <div style="max-width: 600px; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+          <h2 style="color: #333;">Hola ${nombre},</h2>
+          <p style="color: #555; font-size: 16px;">Hemos realizado actualizaciones a tu perfil. Aquí están los detalles:</p>
+          <ul style="color: #555; font-size: 16px; line-height: 1.6;">
+            <li><strong>Nombre:</strong> ${nombre} ${apellido}</li>
+            <li><strong>Correo electrónico:</strong> ${email}</li>
+            <li><strong>Teléfono:</strong> ${telefono}</li>
+            <li><strong>Dirección:</strong> ${direccion}</li>
+          </ul>
+          <p style="color: #555; font-size: 16px;">Como parte de esta actualización, tu contraseña ha sido cambiada. Aquí está tu nueva contraseña temporal:</p>
+          <p style="background-color: #f8d7da; color: #721c24; padding: 10px 20px; border-radius: 5px; font-size: 18px; text-align: center;">
+            <strong>${passwordTextoPlano}</strong>
+          </p>
+          <p style="color: #555; font-size: 16px;">Te recomendamos cambiarla al actualizar tu usuario.</p>
+          <p style="color: #555; font-size: 16px;">Saludos,</p>
+          <p style="color: #333; font-size: 16px; font-weight: bold;">El equipo de ${nombreEmpresa}</p>
+        </div>
+      </body>
+    </html>
+  `;
+
+      await generadorCorreo(titulo, htmlContent, email, nombre);
+    } else {
+      // Si no se actualizó la contraseña, enviar un correo con los demás cambios
+      const titulo = "Actualización de perfil";
+      const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        <div style="max-width: 600px; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+          <h2 style="color: #333;">Hola ${nombre},</h2>
+          <p style="color: #555; font-size: 16px;">Hemos realizado actualizaciones a tu perfil. Aquí están los detalles:</p>
+          <ul style="color: #555; font-size: 16px; line-height: 1.6;">
+            <li><strong>Nombre:</strong> ${nombre} ${apellido}</li>
+            <li><strong>Correo electrónico:</strong> ${email}</li>
+            <li><strong>Teléfono:</strong> ${telefono}</li>
+            <li><strong>Dirección:</strong> ${direccion}</li>
+          </ul>
+          <p style="color: #555; font-size: 16px;">Saludos,</p>
+          <p style="color: #333; font-size: 16px; font-weight: bold;">El equipo de ${nombreEmpresa}</p>
+        </div>
+      </body>
+    </html>
+  `;
+
+      await generadorCorreo(titulo, htmlContent, email, nombre);
     }
 
     res.json({
@@ -297,11 +373,11 @@ export const eliminarUsuario = async (req, res, next) => {
 };
 
 export const getUsuario = async (req, res, next) => {
-  const { id } = req.params;
+  const usuario = req.usuario;
   try {
-    const usuario = await ejecutarSP(SP_OBTENER_USUARIO, [id]);
+    const resultado = await ejecutarSP(SP_OBTENER_USUARIO, [usuario.id]);
     res.json({
-      resultado: usuario[0],
+      resultado: resultado[0],
       ocurrioError: false,
       mensaje: "exito",
     });
@@ -327,8 +403,14 @@ export const actualizarPerfil = async (req, res, next) => {
       password,
     } = req.body;
 
+    const usuario = req.usuario;
+
+    // encriptacion de contraseña
+    const salt = await bcrypt.genSalt(10);
+    const pass = await bcrypt.hash(password, salt);
+
     const resultado = await ejecutarSP(SP_ACTUALIZAR_USUARIO, [
-      idUsuario,
+      usuario.id,
       nombre,
       apellido,
       email,
@@ -337,7 +419,7 @@ export const actualizarPerfil = async (req, res, next) => {
       username,
       false,
       "[]",
-      password,
+      pass,
     ]);
 
     if (resultado && resultado[0]?.existeUsername) {
