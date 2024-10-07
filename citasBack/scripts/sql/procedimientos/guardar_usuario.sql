@@ -9,7 +9,8 @@ CREATE PROCEDURE `guardar_usuario`(
     direccion VARCHAR(256),
     username VARCHAR(256),
 	privado TINYINT,
-    servicios TEXT
+    servicios TEXT,
+    pass VARCHAR(250)
 ) 
 BEGIN
 	-- Declarar variables para capturar el mensaje de error
@@ -60,7 +61,7 @@ BEGIN
             VALUES (
 					@idUsuario,
 					username,
-                    '123456'
+                    pass
 				);
 			
 			SET @i = 0;

@@ -184,6 +184,13 @@ export const guardarUsuario = async (req, res, next) => {
 
     const serviciosSeleccionados = JSON.stringify(servicios);
 
+    // Generar una nueva contraseña temporal
+    const passwordTextoPlano = generarPassword();
+    // Encriptar la contraseña
+    // encriptacion de contraseña
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(passwordTextoPlano, salt);
+
     const resultado = await ejecutarSP(SP_GUARDAR_USUARIO, [
       nombre,
       apellido,
@@ -193,6 +200,7 @@ export const guardarUsuario = async (req, res, next) => {
       username,
       privado,
       serviciosSeleccionados,
+      password,
     ]);
 
     if (resultado && resultado[0]?.existeUsername) {
@@ -210,6 +218,34 @@ export const guardarUsuario = async (req, res, next) => {
         mensaje: `El correo electronico del usuario ya existe`,
       });
     }
+
+    const nombreEmpresa = "THE KING BARBER";
+    const titulo = "Creación de perfil";
+    const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        <div style="max-width: 600px; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+          <h2 style="color: #333;">Hola ${nombre},</h2>
+          <p style="color: #555; font-size: 16px;">Hemos creado tu perfil. Aquí están los detalles:</p>
+          <ul style="color: #555; font-size: 16px; line-height: 1.6;">
+            <li><strong>Nombre:</strong> ${nombre} ${apellido}</li>
+            <li><strong>Correo electrónico:</strong> ${email}</li>
+            <li><strong>Teléfono:</strong> ${telefono}</li>
+            <li><strong>Dirección:</strong> ${direccion}</li>
+          </ul>
+          <p style="color: #555; font-size: 16px;">Aquí está tu contraseña temporal:</p>
+          <p style="background-color: #f8d7da; color: #721c24; padding: 10px 20px; border-radius: 5px; font-size: 18px; text-align: center;">
+            <strong>${passwordTextoPlano}</strong>
+          </p>
+          <p style="color: #555; font-size: 16px;">Te recomendamos cambiarla al actualizar tu usuario.</p>
+          <p style="color: #555; font-size: 16px;">Saludos,</p>
+          <p style="color: #333; font-size: 16px; font-weight: bold;">El equipo de ${nombreEmpresa}</p>
+        </div>
+      </body>
+    </html>
+  `;
+
+    await generadorCorreo(titulo, htmlContent, email, nombre);
 
     res.json({
       resultado: null,
