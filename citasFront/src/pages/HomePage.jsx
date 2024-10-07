@@ -477,8 +477,9 @@ function HomePage() {
           alt=""
         />
       </div>
-      <div className="flex w-full py-36">
+      <div className="flex w-full py-36 flex-col">
         <ToastContainer />
+
         <Card className=" mx-auto p-10 lg:w-[700px] md:w-[700px] ">
           <CardBody className="">
             <form onSubmit={presubmitDatosCita}>
@@ -869,6 +870,26 @@ function HomePage() {
             </form>
           </CardBody>
         </Card>
+
+        <Card className="absolute bottom-0 left-0 right-0 rounded-none">
+          <section className="py-5 bg-gray-800 text-white">
+            <div className="container mx-auto text-center">
+              <p>La mejor barbería de Chiquimulilla.</p>
+              <Link
+                to="/"
+                className="bg-yellow-500 text-black px-6 py-3 rounded mt-4 inline-block"
+              >
+                Regresar a la pagina de inicio
+              </Link>
+            </div>
+            <div className="container mx-auto text-center my-2">
+              <p>
+                &copy; 2024 The King Barber Life. Todos los derechos reservados.
+              </p>
+            </div>
+          </section>
+        </Card>
+
         <Modal
           backdrop="blur"
           isOpen={isOpen}

@@ -5,6 +5,8 @@ import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { recuperarUsuario } from "../../services/usuarios";
 
+import { Link } from "react-router-dom";
+
 export default function RecuperarPage() {
   const [isLoadingSubmit, setisLoadingSubmit] = useState();
 
@@ -109,6 +111,14 @@ export default function RecuperarPage() {
               >
                 Recuparar usuario
               </Button>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Link
+                to={"/login"}
+                className="bg-purple-600 w-full text-center py-2 rounded-lg text-white text-sm"
+              >
+                Regresar al inicio de sesión
+              </Link>
             </div>
           </form>
         </CardBody>

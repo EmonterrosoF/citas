@@ -16,14 +16,15 @@ import ProtectedRoute from "./components/protectedRoute";
 import VerificateIsLogin from "./components/verificateIsLogin";
 import NotFoundPage from "./pages/NotFoundPage";
 import BitacoraCitasPage from "./pages/privadas/BitacoraCitas";
+import LandingPage from "./pages/LandigPage";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Home />} />
-
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/reserva" element={<Home />} />
           <Route
             path="/panel"
             element={
