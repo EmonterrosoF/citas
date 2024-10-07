@@ -90,7 +90,6 @@ export default function ServiciosPage() {
     const data = await obtenerServicios();
 
     if (!data.ocurrioError) {
-      console.log(data.resultado);
       setServicios(data.resultado);
       return;
     }

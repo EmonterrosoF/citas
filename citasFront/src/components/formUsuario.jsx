@@ -157,7 +157,6 @@ export default function FormUsuario({
   };
 
   const changeServicio = (valor) => {
-    console.log("servicios", valor);
     setServiciosSeleccionados(valor);
     if (valor.length < 1) {
       setEsServiciosSeleccionadosInvalido(true);

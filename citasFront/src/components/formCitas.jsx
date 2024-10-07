@@ -15,7 +15,6 @@ export default function FormCitas({
   setOpenChange,
   getCitas,
 }) {
-  console.log("proveedores", proveedores);
   // datos de la persona
   const [idCita] = useState(cita?.id ?? null);
 
@@ -59,7 +58,6 @@ export default function FormCitas({
     cita?.idServicio ?? 0
   );
   const [serviciosList, setServiciosList] = useState(servicios);
-  console.log("servicios nuevo", serviciosList);
 
   const { user } = useContext(AuthContext);
 

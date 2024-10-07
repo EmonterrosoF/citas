@@ -165,7 +165,6 @@ function HomePage() {
   const onChangeServicio = async (e) => {
     setIsDisabledSelectProveedores(true);
     setIsDisabledStep2(true);
-    console.log("servicios");
 
     setServicios(servicios.filter((servicio) => servicio.id != 0));
 
@@ -175,7 +174,6 @@ function HomePage() {
     setDefaultSelectedIdProveedor(["0"]);
 
     if (!data.ocurrioError) {
-      console.log(proveedores);
       if (data.resultado.length > 0) {
         setProveedores([
           { id: 0, nombre: "-- Seleccionar --" },
@@ -255,12 +253,10 @@ function HomePage() {
     setFechaSeleccionadaValida(null);
     setIsDisabledStep3(true);
 
-    console.log(fecha);
     if (!esInvalido) {
       setIsLoadingHorarioDIsponible(true);
 
       setFechaSeleccionadaValida(fecha);
-      console.log(SelectedIdProveedor);
       const data = await obtenerHorariosDisponiblesPorFecha(
         fecha.toString(),
         SelectedIdProveedor[0],
@@ -284,7 +280,6 @@ function HomePage() {
   const changeHorarioSeleccionado = (e) => {
     const horario = e.target.value;
     setIsDisabledStep3(true);
-    console.log(horario);
     setHorarioSeleccionado([horario]);
 
     if (horario != 0) setIsDisabledStep3(horario ? false : true);
@@ -350,7 +345,6 @@ function HomePage() {
   };
 
   const changeNotas = (valor) => {
-    console.log(valor.trim());
     if (valor.length < 120) setNotas(valor);
   };
 

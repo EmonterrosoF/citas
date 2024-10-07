@@ -8,7 +8,7 @@ import { SP_PRE_AUTENTICAR } from "../utils/sp.js";
 export const estaLogueado = async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies; // Obtener el refresh token de las cookies
-    console.log("refresh token: " + refreshToken);
+
     if (!refreshToken) {
       res.status(401);
       const error = new Error("No existe el token");

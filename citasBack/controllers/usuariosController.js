@@ -63,7 +63,6 @@ export const getCitas = async (req, res, next) => {
   try {
     const usuario = req.usuario;
 
-    console.log("user", usuario);
     const citas = await ejecutarSP(SP_OBTENER_CITAS, [usuario.rol, usuario.id]);
     res.json({
       resultado: citas,

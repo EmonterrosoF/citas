@@ -48,8 +48,6 @@ export const guardarServicio = async (req, res, next) => {
   try {
     const { nombre, precio, duracion, privado, descripcion } = req.body;
 
-    console.log({ nombre, precio, duracion, privado, descripcion });
-
     await ejecutarSP(SP_GUARDAR_SERVICIO, [
       nombre,
       precio,

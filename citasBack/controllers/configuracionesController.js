@@ -4,7 +4,7 @@ import { ejecutarSP } from "../data/dbConexion.js";
 export const getHorarioLaboral = async (req, res, next) => {
   try {
     const horario = await ejecutarSP(SP_HORARIO_LABORAL);
-    console.log(JSON.parse(horario[0]?.valor));
+
     res.json({
       resultado: JSON.parse(horario[0]?.valor),
       ocurrioError: false,

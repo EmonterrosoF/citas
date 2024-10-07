@@ -37,12 +37,8 @@ export const ejecutarSP = async (sp, parametros = []) => {
 
     query += `)`;
 
-    console.log(query);
-
     const [rows, fields] = await conection.execute(query, parametros);
 
-    // console.log(rows[0]);
-    // console.log(fields);
     await conection.end();
     return rows[0];
   } catch (error) {

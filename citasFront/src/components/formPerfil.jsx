@@ -40,8 +40,6 @@ export default function FormPerfil({ usuario, getUsuario }) {
 
   const [isLoadingSubmit, setisLoadingSubmit] = useState(false);
 
-  console.log("nombre", nombre);
-
   const changeNombre = (valor) => {
     if (valor.length > 40) return (valor = nombre);
     setNombre(valor);

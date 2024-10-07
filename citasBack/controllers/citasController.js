@@ -69,10 +69,8 @@ export const getCitasReservadasProveedor = async (req, res, next) => {
 
     citasReservadas.forEach((fechaCita) => {
       const fecha = new Date(fechaCita.fechaInicio).toString();
-      console.log(fecha);
       let dia = new Date(fechaCita.fechaInicio).getDay();
       dia = diasDeLaSemana[dia];
-      console.log(dia);
 
       const horario = horarioLaboral[dia];
 
@@ -125,8 +123,6 @@ export const getCitasReservadasProveedor = async (req, res, next) => {
             // Restar el descanso de la duración total
             duracionTotalLaboral -= minutosFinDescanso - minutosInicioDescanso;
           });
-          //   console.log(horario);
-          //   console.log(duracionTotal / 60);
         }
 
         if (duracionesPorDia[fecha] >= duracionTotalLaboral) {
@@ -181,7 +177,6 @@ export const getHorarioDisponiblePorFecha = async (req, res, next) => {
 
     duracionServicio = parseInt(duracionServicio);
 
-    console.log("fecha", fecha);
     const diaSemana = new Date(fecha).getDay();
     const citasReservadas = await ejecutarSP(SP_CITAS_RESERVADAS_POR_FECHA, [
       fecha,
@@ -193,10 +188,7 @@ export const getHorarioDisponiblePorFecha = async (req, res, next) => {
 
     const dia = diasDeLaSemana[diaSemana];
 
-    console.log(diaSemana);
     const horario = horarioLaboral[dia];
-
-    console.log("horario", horario);
 
     if (!horario) {
       return res.json([]); // No hay horario laboral para este día
@@ -220,8 +212,6 @@ export const getHorarioDisponiblePorFecha = async (req, res, next) => {
         minutosActuales += 15;
       }
     }
-
-    console.log("intervalos", intervalos);
 
     // Restar los intervalos que caen dentro de los descansos
     if (horario?.descanso) {
@@ -563,8 +553,6 @@ export const preGuardarCitaCliente = async (req, res, next) => {
 
 export const cancelarCita = async (req, res, next) => {
   const { idCita, nota, correoCliente, nombreCliente } = req.body;
-
-  console.log("valores", idCita, nota);
 
   try {
     await ejecutarSP(SP_CANCELAR_CITA, [idCita, nota]);

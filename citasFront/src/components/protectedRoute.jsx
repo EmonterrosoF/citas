@@ -16,7 +16,6 @@ const ProtectedRoute = ({ children }) => {
 
   const obtenerRefreshToken = async () => {
     const data = await refreshToken();
-    console.log(data);
     if (!data.ocurrioError) {
       setUser(data.resultado);
     } else {
@@ -27,11 +26,9 @@ const ProtectedRoute = ({ children }) => {
   };
 
   useEffect(() => {
-    console.log("entra si");
     const accessToken = Cookies.get("accessToken");
     if (accessToken) {
       const decodedToken = jwtDecode(accessToken); // Decodifica el token
-      console.log("decoded", decodedToken);
       setUser(decodedToken); // Asume que el token contiene el usuario
       setLoading(false);
       return;

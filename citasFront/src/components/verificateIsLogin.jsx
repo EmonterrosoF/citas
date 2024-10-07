@@ -16,7 +16,6 @@ const VerificateIsLogin = ({ children }) => {
 
   const obtenerRefreshToken = async () => {
     const data = await refreshToken();
-    console.log(data);
     if (!data.ocurrioError) {
       setUser(data.resultado);
     } else {

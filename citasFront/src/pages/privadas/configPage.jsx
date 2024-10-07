@@ -21,7 +21,6 @@ export default function ConfigPage() {
     const data = await obtenerHorarioLaboral();
 
     if (!data.ocurrioError) {
-      console.log(data.resultado);
       setHorario(data.resultado);
       setIsLoding(false);
       return;

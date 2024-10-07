@@ -37,9 +37,7 @@ export default async function generadorCorreo(
       email: "cregalo94@gmail.com",
     };
 
-    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-
-    console.log(result);
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
   } catch (error) {
     console.log(error);
     throw new Error(`error al enviar el email: ${error.message}`);

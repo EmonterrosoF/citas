@@ -177,17 +177,11 @@ export default function CalendarioPage() {
             const slotDate = start.toDateString(); // Obtener solo la fecha sin hora
             const citaDate = citaInicio.toDateString(); // Obtener solo la fecha de la cita
 
-            console.log("cita inicio", slotDate);
-            console.log("cita fin", citaDate);
-
             // Comparar si son el mismo día
             if (slotDate !== citaDate) return false; // Si no es el mismo día, no hay superposición
 
             citaInicio = citaInicio.getHours() * 60 + citaInicio.getMinutes();
             citaFin = citaFin.getHours() * 60 + citaFin.getMinutes();
-            console.log("slot inicio", slotTimeStart);
-
-            console.log("slot fin", slotTimeEnd);
 
             return (
               (slotTimeStart >= citaInicio && slotTimeStart < citaFin) ||
